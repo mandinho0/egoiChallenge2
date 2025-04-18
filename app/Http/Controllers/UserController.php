@@ -4,70 +4,102 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-
-    public readonly User $user;
-
-    public function __construct () {
-        $this->user = new User();
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $users = $this->user->all();
-        return view('users', ['users' => $users]);
+        $query = User::query();
+
+        // Pesquisa por nome ou email
+        if ($search = $request->input('search')) {
+            $query->where(fn($q) =>
+                $q->where('name','like',"%{$search}%")
+                  ->orWhere('email','like',"%{$search}%")
+            );
+        }
+
+        // Filtro por role
+        if ($role = $request->input('role')) {
+            $query->where('role', $role);
+        }
+
+        $users = $query
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('users.index', compact('users','search','role'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('users.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'phone'    => 'nullable|string|max:20',
+            'role'     => ['required', Rule::in(['user','admin'])],
+            'birthday' => 'nullable|date',
+        ]);
+
+        $data['password'] = Hash::make($data['password']);
+
+        User::create($data);
+
+        return redirect()
+            ->route('users.index')
+            ->with('success','Utilizador criado com sucesso.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $user)
     {
-        return view('user_detail', ['user' => $user]);
+        return view('users.show', compact('user'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(User $user)
     {
-        return view('user_edit', ['user' => $user]);
+        return view('users.edit', compact('user'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, User $user)
     {
-        //
+        $data = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => ["required","email",Rule::unique('users','email')->ignore($user->id)],
+            'password' => 'nullable|string|min:8|confirmed',
+            'phone'    => 'nullable|string|max:20',
+            'role'     => ['required', Rule::in(['user','admin'])],
+            'birthday' => 'nullable|date',
+        ]);
+
+        // Se veio senha, faz hash; senão remove do array
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()
+            ->route('users.index')
+            ->with('success','Utilizador atualizado com sucesso.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(User $user)
     {
-        //
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success','Utilizador eliminado.');
     }
 }
