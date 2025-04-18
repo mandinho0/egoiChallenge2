@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-  <h2>Editar Utilizador</h2>
+  <h2 class="my-4">Editar Utilizador</h2>
   <form action="{{ route('users.update',$user) }}" method="POST">
     @method('PUT')
     @include('users._form')
@@ -18,6 +18,7 @@
       <input type="password" name="password_confirmation" class="form-control">
     </div>
 
-    <button class="btn btn-primary">Atualizar</button>
+    <a href="{{ route('users.index') }}" class="btn btn-secondary mt-4">Voltar</a>
+    <button class="btn btn-primary mt-4">Atualizar</button>
   </form>
 @endsection

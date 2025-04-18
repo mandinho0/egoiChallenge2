@@ -14,10 +14,12 @@
       <a href="{{ route('login') }}" class="btn btn-primary btn-lg me-2">Login</a>
       <a href="{{ route('register') }}" class="btn btn-outline-secondary btn-lg">Registar</a>
     @else
-      <p class="fs-5">
+      <div class="fs-5">
         Olá, <strong>{{ Auth::user()->name }}</strong>!
+      </div>
+      <div class="fs-5 mt-5" >
         <a href="{{ route('users.index') }}" class="btn btn-success">Ver Utilizadores</a>
-      </p>
+        </div>
     @endguest
   </div>
 @endsection

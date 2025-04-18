@@ -12,5 +12,5 @@
     </li>
     <li class="list-group-item"><strong>Role:</strong> {{ ucfirst($user->role) }}</li>
   </ul>
-  <a href="{{ route('users.index') }}" class="btn btn-secondary mt-3">Voltar</a>
+  <a href="{{ route('users.index') }}" class="btn btn-secondary mt-4">Voltar</a>
 @endsection

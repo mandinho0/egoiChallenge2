@@ -27,7 +27,7 @@
 <div class="form-group">
   <label>Data de Nascimento</label>
   <input type="date" name="birthday"
-         value="{{ old('birthday', isset($user)?$user->birthday->format('Y-m-d'):'' ) }}"
+         value="{{ old('birthday', isset($user) && $user->birthday ? $user->birthday->format('Y-m-d') : '' ) }}"
          class="form-control @error('birthday') is-invalid @enderror">
   @error('birthday')<div class="invalid-feedback">{{ $message }}</div>@enderror
 </div>

@@ -5,24 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
+        $search = $request->input('search');
+        $role   = $request->input('role');
+
+        Log::info('Listagem de utilizadores requisitada', [
+            'pesquisa' => $search,
+            'filtro'   => $role,
+        ]);
+
         $query = User::query();
 
-        // Pesquisa por nome ou email
-        if ($search = $request->input('search')) {
+        if ($search) {
             $query->where(fn($q) =>
-                $q->where('name','like',"%{$search}%")
-                  ->orWhere('email','like',"%{$search}%")
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
             );
         }
 
-        // Filtro por role
-        if ($role = $request->input('role')) {
+        if ($role) {
             $query->where('role', $role);
         }
 
@@ -31,11 +39,12 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('users.index', compact('users','search','role'));
+        return view('users.index', compact('users', 'search', 'role'));
     }
 
     public function create()
     {
+        Log::info('Formulário de criação de utilizador exibido');
         return view('users.create');
     }
 
@@ -52,20 +61,35 @@ class UserController extends Controller
 
         $data['password'] = Hash::make($data['password']);
 
-        User::create($data);
+        $user = User::create($data);
+
+        Log::info('Utilizador criado com sucesso', [
+            'id'    => $user->id,
+            'email' => $user->email,
+        ]);
 
         return redirect()
             ->route('users.index')
-            ->with('success','Utilizador criado com sucesso.');
+            ->with('success', 'Utilizador criado com sucesso.');
     }
 
     public function show(User $user)
     {
+        Log::info('Visualização de utilizador', [
+            'id'    => $user->id,
+            'email' => $user->email,
+        ]);
+
         return view('users.show', compact('user'));
     }
 
     public function edit(User $user)
     {
+        Log::info('Formulário de edição de utilizador exibido', [
+            'id'    => $user->id,
+            'email' => $user->email,
+        ]);
+
         return view('users.edit', compact('user'));
     }
 
@@ -73,14 +97,13 @@ class UserController extends Controller
     {
         $data = $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => ["required","email",Rule::unique('users','email')->ignore($user->id)],
+            'email'    => ['required','email',Rule::unique('users','email')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'phone'    => 'nullable|string|max:20',
             'role'     => ['required', Rule::in(['user','admin'])],
             'birthday' => 'nullable|date',
         ]);
 
-        // Se veio senha, faz hash; senão remove do array
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
@@ -89,17 +112,66 @@ class UserController extends Controller
 
         $user->update($data);
 
+        Log::info('Utilizador atualizado com sucesso', [
+            'id'       => $user->id,
+            'alterado'=> array_keys($data),
+        ]);
+
         return redirect()
             ->route('users.index')
-            ->with('success','Utilizador atualizado com sucesso.');
+            ->with('success', 'Utilizador atualizado com sucesso.');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
 
+        Log::warning('Utilizador eliminado', [
+            'id'    => $user->id,
+            'email' => $user->email,
+        ]);
+
         return redirect()
             ->route('users.index')
-            ->with('success','Utilizador eliminado.');
+            ->with('success', 'Utilizador eliminado.');
+    }
+
+    public function export(): StreamedResponse
+    {
+        $fileName = 'users-' . now()->format('Ymd_His') . '.csv';
+
+        Log::info('Exportação CSV iniciada', [
+            'ficheiro' => $fileName,
+        ]);
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ];
+
+        $columns = ['ID','Nome','Email','Telefone','Role','Data de Nascimento','Criado em'];
+
+        $callback = function() use ($columns) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, $columns);
+
+            User::orderBy('id')->chunk(100, function($users) use ($handle) {
+                foreach ($users as $u) {
+                    fputcsv($handle, [
+                        $u->id,
+                        $u->name,
+                        $u->email,
+                        $u->phone,
+                        ucfirst($u->role),
+                        $u->birthday?->toDateString(),
+                        $u->created_at->toDateTimeString(),
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

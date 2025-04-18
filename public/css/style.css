@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Abel&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+body {
+    font-family: "Abel", sans-serif;
+}
+
+.filter-field {
+    width: 180px;
+    height: 42px;
+    border-radius: 8px;
+    line-height: 42px;
+}
+
+select.filter-field {
+    padding: 0 0 0 .75rem;
+    cursor: pointer;
+}
+
+select.filter-field option {
+    cursor: pointer;
+} 
+
+button.filter-field {
+    width: 100px;
+}
+
+.filter-field.btn {
+    padding: 0;
+}
+  
+.me-2 {
+    text-decoration: initial !important;
+}
+
+.new-user h2 {
+    margin-bottom: unset;
+}
+
+.new-user {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-column-gap: 10px;
+}
+
+.form-group:not(:last-of-type) {
+    margin-bottom: 16px;
+}

@@ -19,8 +19,9 @@ Route::post('register',[AuthController::class, 'register']);
 // Logout
 Route::post('logout',  [AuthController::class, 'logout'])->name('logout');
 
-// Listagem de users
+// Users
 Route::middleware('auth')->group(function(){
+    Route::get('export',            [UserController::class, 'export'])->name('users.export');
     Route::get('/users',            [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create',     [UserController::class, 'create'])->name('users.create');
     Route::post('/users',           [UserController::class, 'store'])->name('users.store');
