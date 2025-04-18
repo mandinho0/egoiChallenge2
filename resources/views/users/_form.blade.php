@@ -1,6 +1,6 @@
 @csrf
 
-<div class="form-group">
+<div class="form-group required">
   <label>Nome</label>
   <input type="text" name="name"
          value="{{ old('name',$user->name ?? '') }}"
@@ -8,7 +8,7 @@
   @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
 </div>
 
-<div class="form-group">
+<div class="form-group required">
   <label>Email</label>
   <input type="email" name="email"
          value="{{ old('email',$user->email ?? '') }}"
@@ -16,7 +16,7 @@
   @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
 </div>
 
-<div class="form-group">
+<div class="form-group required">
   <label>Telefone</label>
   <input type="text" name="phone"
          value="{{ old('phone',$user->phone ?? '') }}"
@@ -24,7 +24,7 @@
   @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
 </div>
 
-<div class="form-group">
+<div class="form-group required">
   <label>Data de Nascimento</label>
   <input type="date" name="birthday"
          value="{{ old('birthday', isset($user) && $user->birthday ? $user->birthday->format('Y-m-d') : '' ) }}"

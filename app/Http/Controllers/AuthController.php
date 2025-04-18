@@ -43,17 +43,27 @@ class AuthController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'phone'    => 'nullable|string|max:20',
+            'phone'    => [
+                'required',
+                'regex:/^(?:\+351)? ?[289]\d{8}$/',
+                'max:20',
+            ],
+            'birthday' => [
+                'required',
+                'date',
+                'before:today',
+            ],
             'role'     => ['required', Rule::in(['user','admin'])],
-            'birthday' => 'nullable|date',
         ]);
 
         $data['password'] = Hash::make($data['password']);
-        $user = User::create($data);
 
+        $user = User::create($data);
         Auth::login($user);
+
         return redirect()->route('home');
     }
+
 
     public function logout(Request $request)
     {

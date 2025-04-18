@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -45,5 +46,63 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+    }
+
+    /**
+     * Add Sample Data
+     */
+    public function insertSamplaData() {
+        DB::table('users')->insert([
+            [
+                'name'       => 'Alice Silva',
+                'email'      => 'alice.silva@example.com',
+                'password'   => bcrypt('password'),
+                'phone'      => '+351912345678',
+                'role'       => 'admin',
+                'birthday'   => '1985-07-20',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name'       => 'Bruno Costa',
+                'email'      => 'bruno.costa@example.com',
+                'password'   => bcrypt('password'),
+                'phone'      => '+351963852741',
+                'role'       => 'user',
+                'birthday'   => '1990-11-05',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name'       => 'Catarina Fernandes',
+                'email'      => 'catarina.fernandes@example.com',
+                'password'   => bcrypt('password'),
+                'phone'      => '+351965478123',
+                'role'       => 'user',
+                'birthday'   => '1995-03-15',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name'       => 'Diogo Martins',
+                'email'      => 'diogo.martins@example.com',
+                'password'   => bcrypt('password'),
+                'phone'      => '+351918273645',
+                'role'       => 'admin',
+                'birthday'   => '1988-12-02',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name'       => 'Eva Oliveira',
+                'email'      => 'eva.oliveira@example.com',
+                'password'   => bcrypt('password'),
+                'phone'      => '+351919191919',
+                'role'       => 'user',
+                'birthday'   => '1993-06-30',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 };

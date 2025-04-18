@@ -45,3 +45,11 @@ button.filter-field {
 .form-group:not(:last-of-type) {
     margin-bottom: 16px;
 }
+
+form .required label::after {
+    content: '*';
+    color: red;
+    padding-left: 4px;
+    display: inline-block;
+    font-size: 12px;
+}

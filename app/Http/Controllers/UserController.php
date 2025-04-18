@@ -54,9 +54,17 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'phone'    => 'nullable|string|max:20',
+            'phone'    => [
+                'required',
+                'regex:/^(?:\+351)? ?[289]\d{8}$/',
+                'max:20',
+            ],
+            'birthday' => [
+                'required',
+                'date',
+                'before:today',
+            ],
             'role'     => ['required', Rule::in(['user','admin'])],
-            'birthday' => 'nullable|date',
         ]);
 
         $data['password'] = Hash::make($data['password']);
@@ -99,9 +107,17 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => ['required','email',Rule::unique('users','email')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'phone'    => 'nullable|string|max:20',
+            'phone'    => [
+                'required',
+                'regex:/^(?:\+351)? ?[289]\d{8}$/',
+                'max:9',
+            ],
+            'birthday' => [
+                'required',
+                'date',
+                'before:today',
+            ],            
             'role'     => ['required', Rule::in(['user','admin'])],
-            'birthday' => 'nullable|date',
         ]);
 
         if (!empty($data['password'])) {
